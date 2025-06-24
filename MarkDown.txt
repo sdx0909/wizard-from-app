@@ -1,0 +1,32 @@
+1: double-space: new line
+
+2: #  : heading 1
+
+3: ## : heading 2 upto 6
+
+4: **bold** OR __bold__  : the bold text.
+
+5: *italic* OR _italic_  : the Italic text.
+            
+6: ***italicbold*** OR ___italicbold___ : italic + bold text.
+
+7: ~~crossedoff~~ : single-strikethrough text.
+
+8: ==highlight== : highlight the text.
+
+9: :smile:   : smiley-Emoji
+
+10: code : either ``` code ```` or indentation
+
+```js
+    // write js code here
+```
+    
+11: H~2~O : for subscript.
+
+12: X^3^ : for superscript.
+
+13: ----(more than three) : horizontal line.
+
+
+
