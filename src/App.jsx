@@ -2,10 +2,10 @@
 // import { useState } from "react";
 
 function App() {
-  // const [currentStep, setCurrentStep] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [username, setUsername] = useState("");
-  // const [password, setPassword] = useState("");
+  const [currentStep, setCurrentStep] = useState("");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="container">
