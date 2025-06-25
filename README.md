@@ -47,7 +47,7 @@
 ```js
 import { useState } from "react";
 function App() {
-  const [currentStep, setCurrentStep] = useState("");
+  const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -190,3 +190,299 @@ label {
 ## NOTE
 
 * By the way, don’t forget to delete the `App.css` file and `assets/` folder because we don’t need them.
+* In the next chapter, we’re going to see how to perform conditional rendering in React so that we can display only one step component at a time.
+
+### CREATING WIZARD FORM MECHANISM
+
+* In this chapter, we’re going to implement the Wizard Form mechanism using React.
+* To do so, we need to know how to `conditionally render` components first.
+* This is  `doable` by specifying a condition when you want to render a component.
+* `doable` means that a task, project, or feature can be successfully completed within the given constraints of time.
+
+## React Conditional Rendering
+
+* You can **control what output is being rendered by a component** by implementing a **conditional rendering** in your JSX.
+* For example, let’s say you want to switch between rendering the `login` and `logout` buttons, depending on the availability of the `user` state:
+
+```js
+function App(props){
+  const { user } = props;
+  if(user){
+    return <button>Logout</button>
+  }
+  return <button>Login</button>
+}
+```
+
+* In the example above, React will render the `logout` button when the `user` value is `truthy`, and the `login` button when `user` is `falsy`.*
+
+## Partial rendering with a regular variable
+
+* When developing with React, there will be cases where you want to render a part of your *UI dynamically* in a component.
+* In the example below, the JSX element is stored in a variable called `button`, and that variable is used again in the return  statement:
+  
+```js
+function App(props){
+  const { user } = props;
+
+  let button = <button>Login</button>;
+
+  if(user){
+    button = <button>Logout</button>;
+  }
+
+  return(
+    <>
+      Hello there!
+      {button}
+    </>
+  )
+}
+```
+
+* Instead of writing two return statements, you store the `dynamic UI` element inside a variable and use that variable in the `return` statement.
+* This way, you can have a component that has `static` and `dynamic` elements.
+
+## Inline rendering with `&&` operator
+
+* It’s possible to render a component only ***if a certain condition is met and render null otherwise***.
+* For example, let’s say you want to render a dynamic message for `users` when they have *new emails* in their inbox:
+
+```js
+function App(){
+  const newEmails = 2;
+
+  return(
+    <>
+      <h1>Hello There..!</h1>
+      { newEmails > 0 && 
+          <h2>
+            it has {newEmails} emails
+          </h2>
+      }
+    </>
+  )
+}
+```
+
+* In this example, the `<h2>` element only gets rendered when the `newEmails` count is greater than `0`.
+  
+## Inline rendering with conditional (ternary) operator
+
+* It’s also possible to use a `ternary operator` in order to render the UI dynamically.
+* Take a look at the following example:
+  
+```js
+function App(props){
+  const { user } = props;
+
+  return (
+    <>
+      <h1>hello there</h1>
+      { user ? <button>Logout</button> : <button>Login</button> }
+    </>
+  )
+}
+```
+
+## Hide Inactive Form Steps
+
+* back to our `wizard-form-app` we need to pass the `currentSteps` prop into the child-components.
+* and use the prop value to determine whether we want to show the component on the screen.
+* Next, go into the `Step1()` function and check the `currentSteps` value with an `if` statement.
+* If the value is anything other than `1`, we don’t need to render the `form` input.
+
+```js
+function App() {
+  const [currentStep, setCurrentStep] = useState("1");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  return (
+    <div className="container">
+      <h1>React Wizard Form</h1>
+      <p>Step {currentStep}</p>
+
+      <form>
+        <Step1 currentStep={currentStep} />
+        <Step2 currentStep={currentStep} />
+        <Step3 currentStep={currentStep} />
+      </form>
+    </div>
+  );
+}
+
+function Step1(props) {
+  if (props.currentStep !== 1) {
+    return null;
+  }
+  // ...
+}
+```
+
+* You need to do the same for `Step2()` and `Step3()` as follows:
+  
+```js
+function Step2(props) {
+  if (props.currentStep !== 2) {
+    return null;
+  }
+  return (
+    // ...
+  );
+}
+
+function Step3(props) {
+  if (props.currentStep !== 2) {
+    return null;
+  }
+  return (
+    // ...
+  );
+}
+```
+
+* Once you save the changes, you should only see the `first step` on the screen.
+* Now you need to `add buttons` so that the **user can move from one step to the other**.
+
+## Adding the Next Button
+
+* To allow the user to move to the next step, you need to create a `button`.
+* and when that button is clicked, **increment the `currentStep` value by `1`**.
+* To do so, you can create the button in the `<form>` element as follows:
+  
+```js
+<form>
+  <Step1 currentStep={currentStep} />
+  <Step2 currentStep={currentStep} />
+  <Step3 currentStep={currentStep} />
+  <button
+    className="btn btn-next f-right"
+    type="button"
+    onClick={() => setCurrentStep((prevStep) => prevStep + 1)}
+  >
+    Next
+  </button>
+</form>
+```
+
+* When the *button is clicked*, we’re going to *call* the `setCurrentStep()` function.
+* In React, the `setSomething()` function **always receive the previous state value when called**.
+* To increment the `currentStep` state value, we make use of the previous state, which we name `prevStep`, and increment it by `1`.
+* You can try the button on the browser, but notice that if you click `Next` after the `third-step`, the form will be empty.
+* Because we only have `three-steps`, we need to prevent the user from clicking the `Next` button when the third form is active.
+* We can do so by adding a condition when rendering the `Next` button.
+* Right below the `useState` calls in your `App()` function, create a function called `nextButton()` with the following content:
+
+```js
+function App(){
+  // useStates
+
+  const nextButton = () => {
+    if (currentStep < 3) {
+      return (
+        <button
+          className="btn btn-next f-right"
+          type="button"
+          onClick={() => setCurrentStep((prevStep) => prevStep + 1)}
+        >
+          Next
+        </button>
+      );
+    }
+    return null;
+  };
+}
+```
+
+* Here, we render the `Next` button only when the `currentStep` value is *less than* `3`.
+* Now we need to **call** the `nextButton()` function in place of the `button` we created below the form steps:
+  
+```js
+<form>
+    <Step1 currentStep={currentStep} />
+    <Step2 currentStep={currentStep} />
+    <Step3 currentStep={currentStep} />
+    {nextButton()} {/* render the nextButton */}
+</form>
+```
+
+* *So far so good*. The next step is to add the `Previous` button so the user can go back to the `previous step`.
+
+## Adding the Previous Button
+
+* To create the `Previous` button, you can copy the `nextButton()` function and *tweak it a little*:
+
+```js
+const previousButton = () => {
+    if (currentStep > 1) {
+      return (
+        <button
+          className="btn btn-previous"
+          type="button"
+          onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+        >
+          Previous
+        </button>
+      );
+    }
+    return null;
+};
+```
+
+* In the code above, the `previousButton()` function checks if the value of `currentStep` is greater than `1` before rendering the button.
+* When the button is clicked, we *decrement the state* value by *one*.
+* Now call this function in the `App` component, just below the `nextButton()` call.
+
+```js
+<form>
+    <Step1 currentStep={currentStep} />
+    <Step2 currentStep={currentStep} />
+    <Step3 currentStep={currentStep} />
+    {nextButton()} {/* render the nextButton */}
+    {previousButton()}
+</form>
+```
+
+* And that’s it. If you test the application now, you can move between the form steps, and the button is rendered only when the condition is right.
+* The last thing we need to do is to add style to the buttons using CSS.
+* Right now, they look pretty bad.
+* Add the following styles to the `index.css` file:
+  
+```css
+.f-right{
+    /* set to right-side */
+    float: right !important;
+}
+
+.btn {
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid transparent;
+}
+
+.btn-next {
+    border-color: #007bff;
+    background-color: #007bff;
+}
+
+.btn-previous {
+    border-color: #6c757d;
+    background-color: #6c757d;
+}
+```
+
+### Summary
+
+* In this chapter, you’ve seen how you can conditionally render components based on the state values. 
+* By creating a state and passing it to the child components, you can determine whether the component should render something to the screen.
+* This is one of the reasons developers love using React. 
+* You write code in a declarative way, specifying the conditions for change in your application.
+* By just changing a state value, the entire application would notice and respond accordingly based on the code you’ve written.
+
+## HANDLING EVENTS IN REACT
