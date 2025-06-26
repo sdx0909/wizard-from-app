@@ -479,10 +479,204 @@ const previousButton = () => {
 
 ### Summary
 
-* In this chapter, you’ve seen how you can conditionally render components based on the state values. 
+* In this chapter, you’ve seen how you can conditionally render components based on the state values.
 * By creating a state and passing it to the child components, you can determine whether the component should render something to the screen.
-* This is one of the reasons developers love using React. 
+* This is one of the reasons developers love using React.
 * You write code in a declarative way, specifying the conditions for change in your application.
 * By just changing a state value, the entire application would notice and respond accordingly based on the code you’ve written.
 
 ## HANDLING EVENTS IN REACT
+
+* React has an internal event handler that connects to the native DOM event.
+* we can add the `onClick` prop to buttons in the previous chapters, which gets executed in response to a click event.
+* When you call a function in response to events, the `event` object will be passed to the `callback` function as follows:
+
+```js
+function App(){
+  const handleClick = (event) => {
+    console.log(event);
+  }
+
+  return(
+    <button onClick={handleClick}>
+      Click me
+    </button>
+  )
+}
+```
+  
+* When you click on the button above, the `event` variable will be logged as a `SyntheticBaseEvent` object in your console:  
+* `output:`
+
+```js
+> SyntheticBaseEvent {_reactName: 'onClick', _targetInst: null, type: 'click', nativeEvent: PointerEvent, target: button, …}
+```
+
+* Whenever a `DOM event` is triggered, that `synthetic event` will be handled by React so that you can decide what to do with that event.
+* The use case for this `Synthetic event` is the same as the native DOM event.
+* You can respond to user interactions like `clicking, hovering, focusing` or `typing` on a form input, submitting form, and so on.
+* Now we will see how to respond to user inputs and form submissions.
+  
+## Storing Form Input With `onChange` Event Handler
+
+* Back to the `wizard-form-app`, we need to handle the data the user typed into our form inputs using React state.
+* This is why we have `email`, `username`, and `password` states in the first place.
+* Before we pass the states to our child components, let’s create a function named `handleChange()` that will be called each time a user types into the inputs.
+* The function will receive the `event` parameter, and *will update the right state based on the input’s `name` attribute*.
+
+```js
+function App(){
+  // ...useStates
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    switch (name) {
+      case "email":
+        setEmail(value);
+        break;
+      case "username":
+        setUsername(value);
+        break;
+      case "password":
+        setPassword(value);
+        break;
+    }
+  };
+}
+```
+
+* There are only a limited number of states you need to change, so using a `switch` statement is perfect for managing state changes.
+* Instead of sending `setEmail` to `Step1` and `setUsername` to `Step2`, you can just send the `handleChange` function to all child components.
+* Let’s do that now:
+
+```js
+<form>
+    <Step1
+      currentStep={currentStep}
+      handleChange={handleChange}
+      email={email}
+    />
+    <Step2
+      currentStep={currentStep}
+      handleChange={handleChange}
+      username={username}
+    />
+    <Step3
+      currentStep={currentStep}
+      handleChange={handleChange}
+      password={password}
+    />
+    {previousButton}
+    {nextButton}
+</form>
+```
+
+* Next, go to each *child components* and use the given `props` on these components.
+* You only need to add the `value` and `onChange` props to the `<input>` elements.
+* See the comment below:
+
+```js
+function Step1(props) {
+  if (props.currentStep !== 1) {
+    return null;
+  }
+  return (
+    <div className="form-wrapper">
+      <label htmlFor="email">Email-Address</label>
+      <input
+        className="form-control"
+        type="text"
+        id="email"
+        name="email"
+        placeholder="Enter Email"
+        value={props.email} // set the value as the email state
+        onChange={props.handleChange} // the handleChange()
+      />
+    </div>
+  );
+}
+```
+
+* You need to add the same props to `Step2` and `Step3`.
+* Whenever you *type or delete* a character from the input, the `onChange` event will be triggered.
+* The `handleChange()` function will then update the state based on the `name` attribute of the `<input>` element as shown above.
+* Now all child component inputs are connected to the state value.
+* The last step is to handle the data submission.
+  
+## Wizard Form Submission
+
+* To handle form submission, you need to create a `handleSubmit()` function that receives an `event` object.
+* Based on the demo, we only need to call the `alert()` function to show the user inputs.
+* Add this function below the `handleChange()` function:
+
+```js
+// for form-submission
+const handleSubmit = (event) => {
+  event.preventDefault();
+  // validations for all-fields are mendatory
+  if (!email || !username || !password) {
+    return alert("all fields are mendatory");
+  }
+  alert(
+    `Your Registration Details:\nEmail: ${email}\nUsername: ${username}\nPassword: ${password}`
+  );
+};
+```
+
+* Next, we need to pass this function to the `<form>` element as follows:
+
+```js
+<form onSubmit={handleSubmit}>
+</form>
+```
+
+* We have the submit process ready, but notice that we didn’t have a button to run the process.
+* We only want the user to be able to submit the form in the `third step` of the form, so let’s add a submit button to `Step3` as follows:
+
+```js
+function Step3(props) {
+  // ...
+  return (
+    <>
+      <div className="form-wrapper">
+        {/* label and input */}
+      </div>
+      <button className="btn btn-submit f-right">Sign up</button>
+    </>
+  );
+}
+```
+
+* Here, the submit button is added below the `<div>` element.
+* We also add the wrapper `<> .. </>` so that only one element is returned by the component.
+* Now the form is finished. You can test the application in the browser.
+* But notice that the form inputs are still there after you submit the data.
+* To `reset` the form, let’s add several function calls to reset the state as follows:
+
+```js
+// for form-submission
+const handleSubmit = (event) => {
+  event.preventDefault();
+  // validations for all-fields are mendatory
+  if (!email || !username || !password) {
+    return alert("all fields are mendatory");
+  }
+  alert(
+    `Your Registration Details:\nEmail: ${email}\nUsername: ${username}\nPassword: ${password}`
+  );
+
+  // reset the entire-form
+  setCurrentStep(1);
+  setEmail("");
+  setUsername("");
+  setPassword("");
+};
+```
+
+### Summary
+
+* ***Congratulations!!!*** on finishing your first React project!
+* The `wizard-form-app` helps you see how to build a web application using React.
+* Although a Wizard Form looks complex, it’s actually pretty easy when you have the steps mechanism implemented in React.
+* By building this project, you’ve seen how an application can be built step-by-step and gradually becomes more complex.
+* **Always begin a project by finding out what the result looks like**,and **then make your way step by step**, ***adding code one block at a time***.
